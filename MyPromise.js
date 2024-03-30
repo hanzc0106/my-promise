@@ -38,7 +38,7 @@ module.exports = class MyPromise {
 
       // resolve只会调用一次, 所以fulfillCallbacks中的函数也之后调用一次
       // resolve调用完成后, 再调用then, 不会触发之前的fulfillCallbacks调用
-      this.fulfillCallbacks.forEach((cb) => cb())
+      this.fulfillCallbacks.forEach((cb) => cb(value))
     }
   }
 
@@ -47,7 +47,7 @@ module.exports = class MyPromise {
       this.state = MyPromise.REJECTED
       this.reason = reason
 
-      this.rejectCallbacks.forEach((cb) => cb())
+      this.rejectCallbacks.forEach((cb) => cb(reason))
     }
   }
 
@@ -90,8 +90,8 @@ module.exports = class MyPromise {
 
       if (this.state === MyPromise.PENDING) {
         // 延时任务缓存回调, 等待延时任务完成
-        this.fulfillCallbacks.push(() => fulfillFunc(this.value))
-        this.rejectCallbacks.push(() => rejectFunc(this.reason))
+        this.fulfillCallbacks.push((value) => fulfillFunc(value))
+        this.rejectCallbacks.push((reason) => rejectFunc(reason))
       } else if (this.state === MyPromise.RESOLVED) {
         // 状态确定后直接执行回调(压入微任务队列)
         fulfillFunc(this.value)
